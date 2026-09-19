@@ -3,51 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
-          content="width=device-width, initial-scale=1.0,
-                   maximum-scale=1.0, user-scalable=no">
+          content="width=device-width, initial-scale=1.0">
 
-    <title>Android Extended Screen V1</title>
+    <title>Android Extended Screen V2</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<header class="topbar">
-    <div class="logo">
-        🖥️ Extended Screen
-    </div>
-
-    <div id="connectionStatus" class="status offline">
-        ● Offline
-    </div>
+<header>
+    <div class="logo">📱 Extended Screen V2</div>
+    <div id="status">● Offline</div>
 </header>
 
 <main>
 
-    <!-- START SCREEN -->
+    <!-- HOME -->
 
-    <section id="startScreen" class="screen active">
+    <section id="home" class="page active">
 
         <div class="hero">
 
-            <div class="big-icon">📱↔️📱</div>
+            <div class="icon">📱↔️📱</div>
 
             <h1>Android Extended Screen</h1>
 
             <p>
-                Turn another Android device into an
-                extended workspace.
+                Stream video from one Android device
+                to another.
             </p>
 
             <div class="buttons">
 
-                <button id="hostButton" class="primary">
-                    🖥️ Start Host
+                <button id="hostBtn">
+                    🖥️ Host
                 </button>
 
-                <button id="displayButton" class="secondary">
-                    📺 Extended Screen
+                <button id="viewerBtn">
+                    📺 Display
                 </button>
 
             </div>
@@ -57,136 +51,61 @@
     </section>
 
 
-    <!-- HOST SCREEN -->
+    <!-- HOST -->
 
-    <section id="hostScreen" class="screen">
+    <section id="host" class="page">
 
-        <div class="panel">
+        <div class="card">
 
-            <h2>🖥️ Host Device</h2>
+            <h2>🖥️ Host</h2>
 
             <p>
-                This Android device is the main screen.
+                Choose a video source and share it
+                with the Display device.
             </p>
 
-            <div class="connection-box">
+            <video
+                id="localVideo"
+                autoplay
+                muted
+                playsinline>
+            </video>
 
-                <span>Connection Code</span>
+            <div class="buttons">
 
-                <strong id="hostCode">
-                    ----
-                </strong>
+                <button id="cameraBtn">
+                    📷 Camera
+                </button>
 
-                <button id="copyCode">
-                    Copy Code
+                <button id="screenBtn">
+                    🖥️ Share Screen
                 </button>
 
             </div>
 
-            <p class="small">
-                Open this same website on the second
-                Android device and select
-                "Extended Screen".
-            </p>
+            <h3>Connection Offer</h3>
 
-            <div class="workspace-preview">
+            <textarea
+                id="offer"
+                placeholder="Offer will appear here">
+            </textarea>
 
-                <h3>Host Workspace</h3>
-
-                <div class="window-grid">
-
-                    <button class="app-window">
-                        🌐 Browser
-                    </button>
-
-                    <button class="app-window">
-                        📝 Notes
-                    </button>
-
-                    <button class="app-window">
-                        📁 Files
-                    </button>
-
-                    <button class="app-window">
-                        🎵 Music
-                    </button>
-
-                </div>
-
-            </div>
-
-            <button id="hostBack" class="back">
-                ← Back
+            <button id="copyOffer">
+                📋 Copy Offer
             </button>
 
-        </div>
+            <h3>Display Answer</h3>
 
-    </section>
+            <textarea
+                id="answerInput"
+                placeholder="Paste answer from Display">
+            </textarea>
 
-
-    <!-- EXTENDED SCREEN -->
-
-    <section id="displayScreen" class="screen">
-
-        <div class="panel">
-
-            <h2>📺 Extended Screen</h2>
-
-            <p>
-                Enter the connection code shown on
-                the host device.
-            </p>
-
-            <input
-                id="codeInput"
-                type="text"
-                maxlength="6"
-                placeholder="Enter 6-digit code"
-                inputmode="numeric"
-            >
-
-            <button id="connectButton" class="primary">
+            <button id="connectHost">
                 🔗 Connect
             </button>
 
-            <div id="displayWorkspace"
-                 class="display-workspace hidden">
-
-                <div class="display-header">
-                    <span>Extended Workspace</span>
-
-                    <button id="fullscreenButton">
-                        ⛶
-                    </button>
-                </div>
-
-                <div class="desktop">
-
-                    <div class="desktop-card">
-                        🌐
-                        <span>Browser</span>
-                    </div>
-
-                    <div class="desktop-card">
-                        📝
-                        <span>Notes</span>
-                    </div>
-
-                    <div class="desktop-card">
-                        📁
-                        <span>Files</span>
-                    </div>
-
-                    <div class="desktop-card">
-                        🎵
-                        <span>Music</span>
-                    </div>
-
-                </div>
-
-            </div>
-
-            <button id="displayBack" class="back">
+            <button class="back" id="hostBack">
                 ← Back
             </button>
 
@@ -194,11 +113,65 @@
 
     </section>
 
+
+    <!-- VIEWER -->
+
+    <section id="viewer" class="page">
+
+        <div class="card">
+
+            <h2>📺 Display</h2>
+
+            <p>
+                Paste the Host offer below.
+            </p>
+
+            <textarea
+                id="offerInput"
+                placeholder="Paste Host offer">
+            </textarea>
+
+            <button id="createAnswer">
+                🔗 Connect to Host
+            </button>
+
+            <h3>Your Answer</h3>
+
+            <textarea
+                id="answer"
+                placeholder="Answer will appear here">
+            </textarea>
+
+            <button id="copyAnswer">
+                📋 Copy Answer
+            </button>
+
+            <div class="remote-container">
+
+                <video
+                    id="remoteVideo"
+                    autoplay
+                    playsinline>
+                </video>
+
+                <button id="fullscreen">
+                    ⛶ Fullscreen
+                </button>
+
+            </div>
+
+            <button class="back" id="viewerBack">
+                ← Back
+            </button>
+
+        </div>
+
+    </section>
 
 </main>
 
 <footer>
-    Android Extended Screen V1
+    Android Extended Screen V2
 </footer>
 
 <script src="script.js"></script>
