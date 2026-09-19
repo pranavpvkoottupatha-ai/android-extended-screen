@@ -1,279 +1,576 @@
-// ==========================================
-// ANDROID EXTENDED SCREEN V1
-// ==========================================
+// ============================================
+// ANDROID EXTENDED SCREEN V2
+// WebRTC video streaming
+// ============================================
 
-const startScreen = document.getElementById("startScreen");
-const hostScreen = document.getElementById("hostScreen");
-const displayScreen = document.getElementById("displayScreen");
+const home = document.getElementById("home");
+const host = document.getElementById("host");
+const viewer = document.getElementById("viewer");
 
-const hostButton = document.getElementById("hostButton");
-const displayButton = document.getElementById("displayButton");
+const statusText = document.getElementById("status");
+
+const hostBtn = document.getElementById("hostBtn");
+const viewerBtn = document.getElementById("viewerBtn");
 
 const hostBack = document.getElementById("hostBack");
-const displayBack = document.getElementById("displayBack");
+const viewerBack = document.getElementById("viewerBack");
 
-const hostCode = document.getElementById("hostCode");
-const copyCode = document.getElementById("copyCode");
+const localVideo =
+    document.getElementById("localVideo");
 
-const codeInput = document.getElementById("codeInput");
-const connectButton = document.getElementById("connectButton");
+const remoteVideo =
+    document.getElementById("remoteVideo");
 
-const displayWorkspace =
-    document.getElementById("displayWorkspace");
+const offerBox =
+    document.getElementById("offer");
 
-const fullscreenButton =
-    document.getElementById("fullscreenButton");
+const offerInput =
+    document.getElementById("offerInput");
 
-const connectionStatus =
-    document.getElementById("connectionStatus");
+const answerBox =
+    document.getElementById("answer");
+
+const answerInput =
+    document.getElementById("answerInput");
+
+const cameraBtn =
+    document.getElementById("cameraBtn");
+
+const screenBtn =
+    document.getElementById("screenBtn");
+
+const copyOffer =
+    document.getElementById("copyOffer");
+
+const copyAnswer =
+    document.getElementById("copyAnswer");
+
+const connectHost =
+    document.getElementById("connectHost");
+
+const createAnswer =
+    document.getElementById("createAnswer");
+
+const fullscreen =
+    document.getElementById("fullscreen");
 
 
-// ==========================================
-// SCREEN SWITCHING
-// ==========================================
+// ============================================
+// WEBRTC CONFIGURATION
+// ============================================
 
-function showScreen(screen) {
+const rtcConfig = {
 
-    startScreen.classList.remove("active");
-    hostScreen.classList.remove("active");
-    displayScreen.classList.remove("active");
+    iceServers: [
+        {
+            urls: "stun:stun.l.google.com:19302"
+        },
+        {
+            urls: "stun:stun1.l.google.com:19302"
+        }
+    ]
 
-    screen.classList.add("active");
+};
+
+
+// ============================================
+// VARIABLES
+// ============================================
+
+let hostConnection = null;
+
+let viewerConnection = null;
+
+let localStream = null;
+
+
+// ============================================
+// PAGE SWITCHING
+// ============================================
+
+function showPage(page) {
+
+    home.classList.remove("active");
+    host.classList.remove("active");
+    viewer.classList.remove("active");
+
+    page.classList.add("active");
+
 }
 
 
-// ==========================================
-// GENERATE CONNECTION CODE
-// ==========================================
+// ============================================
+// STATUS
+// ============================================
 
-function generateCode() {
+function setStatus(text, online = false) {
 
-    return Math.floor(
-        100000 + Math.random() * 900000
-    ).toString();
-}
+    statusText.textContent = "● " + text;
 
+    if (online) {
 
-// ==========================================
-// HOST MODE
-// ==========================================
+        statusText.classList.add("online");
 
-let currentHostCode = "";
+    } else {
 
-hostButton.addEventListener("click", () => {
+        statusText.classList.remove("online");
 
-    currentHostCode = generateCode();
-
-    hostCode.textContent = currentHostCode;
-
-    connectionStatus.textContent = "● Host Ready";
-    connectionStatus.className = "status online";
-
-    showScreen(hostScreen);
-
-});
-
-
-// ==========================================
-// COPY CONNECTION CODE
-// ==========================================
-
-copyCode.addEventListener("click", async () => {
-
-    if (!currentHostCode) {
-        return;
     }
+
+}
+
+
+// ============================================
+// HOST MODE
+// ============================================
+
+hostBtn.onclick = () => {
+
+    showPage(host);
+
+    setStatus("Host");
+
+};
+
+
+// ============================================
+// VIEWER MODE
+// ============================================
+
+viewerBtn.onclick = () => {
+
+    showPage(viewer);
+
+    setStatus("Display");
+
+};
+
+
+// ============================================
+// CAMERA
+// ============================================
+
+cameraBtn.onclick = async () => {
 
     try {
 
-        await navigator.clipboard.writeText(
-            currentHostCode
-        );
+        localStream =
+            await navigator.mediaDevices.getUserMedia({
 
-        copyCode.textContent = "Copied ✓";
+                video: {
+                    facingMode: "environment"
+                },
 
-        setTimeout(() => {
-            copyCode.textContent = "Copy Code";
-        }, 1500);
+                audio: false
+
+            });
+
+        localVideo.srcObject =
+            localStream;
+
+        setStatus("Camera Ready", true);
 
     } catch (error) {
 
         alert(
-            "Your browser does not allow automatic copying."
+            "Camera permission was denied or unavailable."
         );
+
+        console.error(error);
 
     }
 
-});
+};
 
 
-// ==========================================
-// EXTENDED SCREEN MODE
-// ==========================================
+// ============================================
+// SCREEN CAPTURE
+// ============================================
 
-displayButton.addEventListener("click", () => {
+screenBtn.onclick = async () => {
 
-    connectionStatus.textContent = "● Waiting";
-    connectionStatus.className = "status offline";
+    try {
 
-    showScreen(displayScreen);
+        localStream =
+            await navigator.mediaDevices.getDisplayMedia({
 
-    codeInput.focus();
+                video: true,
 
-});
+                audio: false
 
+            });
 
-// ==========================================
-// CONNECT
-// ==========================================
+        localVideo.srcObject =
+            localStream;
 
-connectButton.addEventListener("click", () => {
+        setStatus("Screen Capture Ready", true);
 
-    const enteredCode =
-        codeInput.value.trim();
-
-    if (enteredCode.length !== 6) {
+    } catch (error) {
 
         alert(
-            "Please enter the 6-digit connection code."
+            "Screen sharing was cancelled or is not supported."
+        );
+
+        console.error(error);
+
+    }
+
+};
+
+
+// ============================================
+// CREATE HOST OFFER
+// ============================================
+
+async function createHostOffer() {
+
+    if (!localStream) {
+
+        alert(
+            "First choose Camera or Share Screen."
         );
 
         return;
-    }
-
-    /*
-       V1 DEMO CONNECTION
-
-       This version demonstrates the second-screen
-       interface. Real device-to-device networking
-       will be added in V2.
-    */
-
-    displayWorkspace.classList.remove("hidden");
-
-    connectionStatus.textContent =
-        "● Connected";
-
-    connectionStatus.className =
-        "status online";
-
-    connectButton.textContent =
-        "Connected ✓";
-
-});
-
-
-// ==========================================
-// FULLSCREEN
-// ==========================================
-
-fullscreenButton.addEventListener(
-    "click",
-    async () => {
-
-        const workspace =
-            document.getElementById(
-                "displayWorkspace"
-            );
-
-        try {
-
-            if (!document.fullscreenElement) {
-
-                await workspace.requestFullscreen();
-
-            } else {
-
-                await document.exitFullscreen();
-
-            }
-
-        } catch (error) {
-
-            alert(
-                "Fullscreen is not supported by this browser."
-            );
-
-        }
 
     }
-);
+
+    hostConnection =
+        new RTCPeerConnection(rtcConfig);
 
 
-// ==========================================
-// DESKTOP ICONS
-// ==========================================
+    // Add video tracks
 
-const desktopCards =
-    document.querySelectorAll(".desktop-card");
+    localStream.getTracks().forEach(track => {
 
-desktopCards.forEach(card => {
-
-    card.addEventListener("click", () => {
-
-        const name =
-            card.querySelector("span").textContent;
-
-        alert(
-            name +
-            " window selected."
+        hostConnection.addTrack(
+            track,
+            localStream
         );
 
     });
 
-});
+
+    hostConnection.onicecandidate =
+        event => {
+
+            if (!event.candidate) {
+
+                offerBox.value =
+                    JSON.stringify(
+                        hostConnection.localDescription
+                    );
+
+            }
+
+        };
 
 
-// ==========================================
-// BACK BUTTONS
-// ==========================================
+    hostConnection.onconnectionstatechange =
+        () => {
 
-hostBack.addEventListener("click", () => {
+            console.log(
+                "Host:",
+                hostConnection.connectionState
+            );
 
-    connectionStatus.textContent =
-        "● Offline";
+            if (
+                hostConnection.connectionState ===
+                "connected"
+            ) {
 
-    connectionStatus.className =
-        "status offline";
+                setStatus(
+                    "Connected",
+                    true
+                );
 
-    showScreen(startScreen);
+            }
 
-});
-
-
-displayBack.addEventListener("click", () => {
-
-    connectionStatus.textContent =
-        "● Offline";
-
-    connectionStatus.className =
-        "status offline";
-
-    displayWorkspace.classList.add("hidden");
-
-    connectButton.textContent =
-        "🔗 Connect";
-
-    codeInput.value = "";
-
-    showScreen(startScreen);
-
-});
+        };
 
 
-// ==========================================
-// ENTER KEY
-// ==========================================
+    const offer =
+        await hostConnection.createOffer();
 
-codeInput.addEventListener(
-    "keydown",
-    event => {
+    await hostConnection.setLocalDescription(
+        offer
+    );
 
-        if (event.key === "Enter") {
+}
 
-            connectButton.click();
+
+screenBtn.addEventListener(
+    "dblclick",
+    createHostOffer
+);
+
+cameraBtn.addEventListener(
+    "dblclick",
+    createHostOffer
+);
+
+
+// ============================================
+// CONNECT HOST WITH VIEWER ANSWER
+// ============================================
+
+connectHost.onclick = async () => {
+
+    if (!hostConnection) {
+
+        await createHostOffer();
+
+    }
+
+    try {
+
+        const answer =
+            JSON.parse(
+                answerInput.value
+            );
+
+        await hostConnection.setRemoteDescription(
+            new RTCSessionDescription(answer)
+        );
+
+        setStatus(
+            "Connected",
+            true
+        );
+
+    } catch (error) {
+
+        alert(
+            "Invalid Display answer."
+        );
+
+        console.error(error);
+
+    }
+
+};
+
+
+// ============================================
+// VIEWER CREATE ANSWER
+// ============================================
+
+createAnswer.onclick = async () => {
+
+    try {
+
+        const offer =
+            JSON.parse(
+                offerInput.value
+            );
+
+
+        viewerConnection =
+            new RTCPeerConnection(rtcConfig);
+
+
+        viewerConnection.ontrack =
+            event => {
+
+                remoteVideo.srcObject =
+                    event.streams[0];
+
+                setStatus(
+                    "Streaming",
+                    true
+                );
+
+            };
+
+
+        viewerConnection.onconnectionstatechange =
+            () => {
+
+                console.log(
+                    "Viewer:",
+                    viewerConnection.connectionState
+                );
+
+            };
+
+
+        await viewerConnection.setRemoteDescription(
+
+            new RTCSessionDescription(
+                offer
+            )
+
+        );
+
+
+        const answer =
+            await viewerConnection.createAnswer();
+
+
+        await viewerConnection.setLocalDescription(
+            answer
+        );
+
+
+        viewerConnection.onicecandidate =
+            event => {
+
+                if (!event.candidate) {
+
+                    answerBox.value =
+                        JSON.stringify(
+                            viewerConnection.localDescription
+                        );
+
+                }
+
+            };
+
+
+    } catch (error) {
+
+        alert(
+            "Invalid Host offer."
+        );
+
+        console.error(error);
+
+    }
+
+};
+
+
+// ============================================
+// COPY OFFER
+// ============================================
+
+copyOffer.onclick = async () => {
+
+    if (!offerBox.value) {
+
+        alert(
+            "Create the Host offer first."
+        );
+
+        return;
+
+    }
+
+    await navigator.clipboard.writeText(
+        offerBox.value
+    );
+
+    copyOffer.textContent =
+        "Copied ✓";
+
+};
+
+
+// ============================================
+// COPY ANSWER
+// ============================================
+
+copyAnswer.onclick = async () => {
+
+    if (!answerBox.value) {
+
+        alert(
+            "Create the Display answer first."
+        );
+
+        return;
+
+    }
+
+    await navigator.clipboard.writeText(
+        answerBox.value
+    );
+
+    copyAnswer.textContent =
+        "Copied ✓";
+
+};
+
+
+// ============================================
+// FULLSCREEN
+// ============================================
+
+fullscreen.onclick = async () => {
+
+    try {
+
+        if (!document.fullscreenElement) {
+
+            await remoteVideo.requestFullscreen();
+
+        } else {
+
+            await document.exitFullscreen();
 
         }
 
+    } catch (error) {
+
+        console.error(error);
+
     }
-);
+
+};
+
+
+// ============================================
+// BACK BUTTONS
+// ============================================
+
+hostBack.onclick = () => {
+
+    if (localStream) {
+
+        localStream.getTracks().forEach(
+            track => track.stop()
+        );
+
+        localStream = null;
+
+    }
+
+    if (hostConnection) {
+
+        hostConnection.close();
+
+        hostConnection = null;
+
+    }
+
+    localVideo.srcObject = null;
+
+    offerBox.value = "";
+    answerInput.value = "";
+
+    setStatus("Offline");
+
+    showPage(home);
+
+};
+
+
+viewerBack.onclick = () => {
+
+    if (viewerConnection) {
+
+        viewerConnection.close();
+
+        viewerConnection = null;
+
+    }
+
+    remoteVideo.srcObject = null;
+
+    offerInput.value = "";
+    answerBox.value = "";
+
+    setStatus("Offline");
+
+    showPage(home);
+
+};
