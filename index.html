@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0,
+                   maximum-scale=1.0, user-scalable=no">
+
+    <title>Android Extended Screen V1</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header class="topbar">
+    <div class="logo">
+        🖥️ Extended Screen
+    </div>
+
+    <div id="connectionStatus" class="status offline">
+        ● Offline
+    </div>
+</header>
+
+<main>
+
+    <!-- START SCREEN -->
+
+    <section id="startScreen" class="screen active">
+
+        <div class="hero">
+
+            <div class="big-icon">📱↔️📱</div>
+
+            <h1>Android Extended Screen</h1>
+
+            <p>
+                Turn another Android device into an
+                extended workspace.
+            </p>
+
+            <div class="buttons">
+
+                <button id="hostButton" class="primary">
+                    🖥️ Start Host
+                </button>
+
+                <button id="displayButton" class="secondary">
+                    📺 Extended Screen
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- HOST SCREEN -->
+
+    <section id="hostScreen" class="screen">
+
+        <div class="panel">
+
+            <h2>🖥️ Host Device</h2>
+
+            <p>
+                This Android device is the main screen.
+            </p>
+
+            <div class="connection-box">
+
+                <span>Connection Code</span>
+
+                <strong id="hostCode">
+                    ----
+                </strong>
+
+                <button id="copyCode">
+                    Copy Code
+                </button>
+
+            </div>
+
+            <p class="small">
+                Open this same website on the second
+                Android device and select
+                "Extended Screen".
+            </p>
+
+            <div class="workspace-preview">
+
+                <h3>Host Workspace</h3>
+
+                <div class="window-grid">
+
+                    <button class="app-window">
+                        🌐 Browser
+                    </button>
+
+                    <button class="app-window">
+                        📝 Notes
+                    </button>
+
+                    <button class="app-window">
+                        📁 Files
+                    </button>
+
+                    <button class="app-window">
+                        🎵 Music
+                    </button>
+
+                </div>
+
+            </div>
+
+            <button id="hostBack" class="back">
+                ← Back
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- EXTENDED SCREEN -->
+
+    <section id="displayScreen" class="screen">
+
+        <div class="panel">
+
+            <h2>📺 Extended Screen</h2>
+
+            <p>
+                Enter the connection code shown on
+                the host device.
+            </p>
+
+            <input
+                id="codeInput"
+                type="text"
+                maxlength="6"
+                placeholder="Enter 6-digit code"
+                inputmode="numeric"
+            >
+
+            <button id="connectButton" class="primary">
+                🔗 Connect
+            </button>
+
+            <div id="displayWorkspace"
+                 class="display-workspace hidden">
+
+                <div class="display-header">
+                    <span>Extended Workspace</span>
+
+                    <button id="fullscreenButton">
+                        ⛶
+                    </button>
+                </div>
+
+                <div class="desktop">
+
+                    <div class="desktop-card">
+                        🌐
+                        <span>Browser</span>
+                    </div>
+
+                    <div class="desktop-card">
+                        📝
+                        <span>Notes</span>
+                    </div>
+
+                    <div class="desktop-card">
+                        📁
+                        <span>Files</span>
+                    </div>
+
+                    <div class="desktop-card">
+                        🎵
+                        <span>Music</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <button id="displayBack" class="back">
+                ← Back
+            </button>
+
+        </div>
+
+    </section>
+
+
+</main>
+
+<footer>
+    Android Extended Screen V1
+</footer>
+
+<script src="script.js"></script>
+
+</body>
+</html>
